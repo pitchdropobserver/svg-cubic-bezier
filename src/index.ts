@@ -1,14 +1,15 @@
 import SvgElem from 'svg-elem'
-import { purgeOwnKeys } from 'brodash'
+import { purgeOwnKeys, deepMergeTwoObjs, copy } from 'brodash'
 
 import {
-	STYLE_BZ_CURVE,
-	STYLE_CTRL_PT,
-	STYLE_START_PT_END_PT,
-	STYLE_CTRL_LINE,
+	STYLE_CURVE,
+	STYLE_CTRL_PTS,
+	STYLE_ANCHOR_PTS,
+	STYLE_HANDLES,
 } from './constants'
 
 import { IProps, HTMLInputEvent } from './interface'
+
 
 
 class SvgCubicBezier {
@@ -17,24 +18,27 @@ class SvgCubicBezier {
 	//---- bezier curve element ----
 	private svgBezierCurve: SvgElem
 	//---- helper element ----
-	private svgCtrlPt0: SvgElem // start point on  crv
+	private svgCtrlPt0: SvgElem // start anchor point on  crv
 	private svgCtrlPt1: SvgElem // detached control pt off start 
 	private svgCtrlPt2: SvgElem // detached control pt off end 
-	private svgCtrlPt3: SvgElem // end point on crv
-	private svgCtrlArmStart: SvgElem
-	private svgCtrlArmEnd: SvgElem
+	private svgCtrlPt3: SvgElem // end anchor point on crv
+	private svgCtrlHandleStart: SvgElem
+	private svgCtrlHandleEnd: SvgElem
 
 	constructor(props: IProps) {
 		this.handlePtClick = this.handlePtClick.bind(this)
-		this.props = Object.assign({
+		this.props = deepMergeTwoObjs({
 			// default props...
 			parentDom: null,
-			endMarkerId: 'bezier-end-pt',
-			startMarkerId: 'bezier-start-pt',
-			styleCurve: null,
-			shouldDrawHelpers: false,
-			isDualDirection: false, // if curve is dual direction, control pts will flips sides when crv startPt moves to right of endPt...
-		}, props)
+			endMarkerId: 'bezier-ctrl-pt-3',
+			startMarkerId: 'bezier-ctrl-pt-0',
+			shouldShowCtrlPts: false,
+			isDualDirection: false, // if curve is dual direction, control pts will flips sides when start-anchor-pt moves to right of end-anchor-pt...
+			styleAnchorPts: copy(STYLE_ANCHOR_PTS),
+			styleCtrlPts: copy(STYLE_CTRL_PTS),
+			styleHandles: copy(STYLE_HANDLES),
+			styleCurve: copy(STYLE_CURVE),
+		}, props, 'parentDom')
 		return this
 	}
 
@@ -45,20 +49,20 @@ class SvgCubicBezier {
 	public handlePtClick(e: HTMLInputEvent): void{
 		const { target } = e
 		const { 
-			shouldDrawHelpers,
+			shouldShowCtrlPts,
 			onCtrlPtClick,
 			endMarkerId,
 			startMarkerId,
 		} = this.props
-		if (shouldDrawHelpers && onCtrlPtClick){
+		if (shouldShowCtrlPts && onCtrlPtClick){
 			switch (target.id) {
 				case startMarkerId: 
 					onCtrlPtClick(0, target, this.svgCtrlPt0)
 					break
-				case 'bezier-start-ctrl-pt': 
+				case 'bezier-ctrl-pt-1': 
 					onCtrlPtClick(1, target, this.svgCtrlPt1)
 					break
-				case 'bezier-end-ctrl-pt': 
+				case 'bezier-ctrl-pt-2': 
 					onCtrlPtClick(2, target, this.svgCtrlPt2)
 					break
 				case endMarkerId: 
@@ -69,7 +73,7 @@ class SvgCubicBezier {
 	}
 
 	public updateProps(props: IProps): SvgCubicBezier {
-		Object.assign(this.props, props)
+		deepMergeTwoObjs(this.props, props, 'parentDom')
 		this.calc()
 		this.draw()
 		return this
@@ -81,8 +85,8 @@ class SvgCubicBezier {
 		if (this.svgCtrlPt3 !== null) this.svgCtrlPt3.destroy()
 		if (this.svgCtrlPt1 !== null) this.svgCtrlPt1.destroy()
 		if (this.svgCtrlPt2 !== null) this.svgCtrlPt2.destroy()
-		if (this.svgCtrlArmStart !== null) this.svgCtrlArmStart.destroy()
-		if (this.svgCtrlArmEnd !== null) this.svgCtrlArmEnd.destroy()
+		if (this.svgCtrlHandleStart !== null) this.svgCtrlHandleStart.destroy()
+		if (this.svgCtrlHandleEnd !== null) this.svgCtrlHandleEnd.destroy()
 		purgeOwnKeys(this, true)
 	}
 
@@ -97,13 +101,13 @@ class SvgCubicBezier {
 	}
 
 	private draw(): SvgCubicBezier {
-		const { shouldDrawHelpers } = this.props
+		const { shouldShowCtrlPts } = this.props
 		this.drawBezierCurve()
-		if (shouldDrawHelpers) {
+		if (shouldShowCtrlPts) {
 			this.drawCrvStartEndPt()
 			this.drawCrvHelperArms()
 		} else {
-			const { svgCtrlArmStart } = this
+			const { svgCtrlHandleStart: svgCtrlArmStart } = this
 			if (svgCtrlArmStart){ // if helpers are drawn...
 				this.removeHelpers()
 			}
@@ -113,8 +117,8 @@ class SvgCubicBezier {
 
 	private removeHelpers(): void{
 		const { 
-			svgCtrlArmStart,
-			svgCtrlArmEnd,
+			svgCtrlHandleStart: svgCtrlArmStart,
+			svgCtrlHandleEnd: svgCtrlArmEnd,
 			svgCtrlPt0,
 			svgCtrlPt1,
 			svgCtrlPt2,
@@ -126,8 +130,8 @@ class SvgCubicBezier {
 		svgCtrlPt1.destroy()
 		svgCtrlPt2.destroy()
 		svgCtrlPt3.destroy()
-		this.svgCtrlArmStart = undefined
-		this.svgCtrlArmEnd = undefined
+		this.svgCtrlHandleStart = undefined
+		this.svgCtrlHandleEnd = undefined
 		this.svgCtrlPt0 = undefined
 		this.svgCtrlPt1 = undefined
 		this.svgCtrlPt2 = undefined
@@ -158,20 +162,18 @@ class SvgCubicBezier {
 			dx = Math.abs(dx)
 			dy = Math.abs(dy)
 		}
+		const ctrlPt1 = {
+			x: crvStart.x + dx,
+			y: crvStart.y
+		}
+		const ctrlPt2 = {
+			x: crvEnd.x - dx,
+			y: crvEnd.y
+		}
+	
 		Object.assign(
 			this.props, {
-				ctrlPts: [
-					crvStart,
-					{
-						x: crvStart.x + dx,
-						y: crvStart.y
-					},
-					{
-						x: crvEnd.x - dx,
-						y: crvEnd.y
-					},
-					crvEnd,
-				]				
+				ctrlPts: [ crvStart, ctrlPt1, ctrlPt2, crvEnd ]
 			}
 		)
 	}
@@ -217,14 +219,14 @@ class SvgCubicBezier {
 			this.svgBezierCurve = new SvgElem({
 				parentDom: parentDom,
 				tag: 'path',
-				style: styleCurve || STYLE_BZ_CURVE,
+				style: styleCurve,
 				attr,
 			})
 		}
 	}
 
 	private drawCrvStartEndPt(): void {
-		const { parentDom, ctrlPts} = this.props
+		const { parentDom, ctrlPts, styleAnchorPts } = this.props
 		const { svgCtrlPt0: svgStartPt, svgCtrlPt3: svgEndPt } = this
 
 		if (svgStartPt instanceof SvgElem) { // update...
@@ -245,9 +247,9 @@ class SvgCubicBezier {
 				listeners:{
 					'mousedown': this.handlePtClick,
 				},
-				style: STYLE_START_PT_END_PT,
+				style: styleAnchorPts,
 				attr: {
-					'id': 'bezier-start-pt',
+					'id': 'bezier-ctrl-pt-0',
 					'cx': ctrlPts[0].x,
 					'cy': ctrlPts[0].y,
 					'r': 4,
@@ -259,9 +261,9 @@ class SvgCubicBezier {
 				listeners: {
 					'mousedown': this.handlePtClick,
 				},
-				style: STYLE_START_PT_END_PT,
+				style: styleAnchorPts,
 				attr: {
-					'id': 'bezier-end-pt',
+					'id': 'bezier-ctrl-pt-3',
 					'cx': ctrlPts[3].x,
 					'cy': ctrlPts[3].y,
 					'r': 4,
@@ -274,13 +276,15 @@ class SvgCubicBezier {
 		const {
 			parentDom,
 			ctrlPts,
+			styleCtrlPts,
+			styleHandles,
 		} = this.props
 
 		const {
-			svgCtrlArmStart,
+			svgCtrlHandleStart: svgCtrlArmStart,
 			svgCtrlPt1,
 			svgCtrlPt2,
-			svgCtrlArmEnd,
+			svgCtrlHandleEnd: svgCtrlArmEnd,
 		} = this
 
 		if (svgCtrlPt1 instanceof SvgElem) { // update...
@@ -307,10 +311,10 @@ class SvgCubicBezier {
 				'y2': ctrlPts[2].y,
 			})
 		} else { // init...
-			this.svgCtrlArmStart = new SvgElem({
+			this.svgCtrlHandleStart = new SvgElem({
 				parentDom: parentDom,
 				tag: 'line',
-				style: STYLE_CTRL_LINE,
+				style: styleHandles,
 				attr: {
 					'x1': ctrlPts[0].x,
 					'y1': ctrlPts[0].y,
@@ -318,10 +322,10 @@ class SvgCubicBezier {
 					'y2': ctrlPts[1].y,
 				}
 			})
-			this.svgCtrlArmEnd = new SvgElem({
+			this.svgCtrlHandleEnd = new SvgElem({
 				parentDom: parentDom,
 				tag: 'line',
-				style: STYLE_CTRL_LINE,
+				style: styleHandles,
 				attr: {
 					'x1': ctrlPts[3].x,
 					'y1': ctrlPts[3].y,
@@ -335,9 +339,9 @@ class SvgCubicBezier {
 				listeners: {
 					'mousedown': this.handlePtClick,
 				},
-				style: STYLE_CTRL_PT,
+				style: styleCtrlPts,
 				attr: {
-					'id': 'bezier-start-ctrl-pt',
+					'id': 'bezier-ctrl-pt-1',
 					'cx': ctrlPts[1].x,
 					'cy': ctrlPts[1].y,
 					'r': 4,
@@ -349,9 +353,9 @@ class SvgCubicBezier {
 				listeners: {
 					'mousedown': this.handlePtClick,
 				},
-				style: STYLE_CTRL_PT,
+				style: styleCtrlPts,
 				attr: {
-					'id': 'bezier-end-ctrl-pt',
+					'id': 'bezier-ctrl-pt-2',
 					'cx': ctrlPts[2].x,
 					'cy': ctrlPts[2].y,
 					'r': 4,

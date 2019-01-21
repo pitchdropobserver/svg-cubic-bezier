@@ -3,7 +3,7 @@ export interface IPt {
 	y: number
 }
 
-export interface IStyle {
+export interface ICssStyle {
 	[index: string]: string
 }
 
@@ -12,8 +12,11 @@ export interface IProps {
 	ctrlPts: Array<IPt>
 	endMarkerId: string
 	startMarkerId: string
-	styleCurve: IStyle
-	shouldDrawHelpers: boolean
+	styleCurve: ICssStyle
+	styleAnchorPts: ICssStyle
+	styleCtrlPts: ICssStyle
+	styleHandles: ICssStyle
+	shouldShowCtrlPts: boolean
 	isDualDirection: boolean
 	onCtrlPtClick: Function
 }

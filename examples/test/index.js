@@ -8,7 +8,7 @@ const WIN_W = window.innerWidth
 const WIN_H = window.innerHeight
 
 
-let mousedownPtIndex
+let mdCtrlPtIndex // index of mousedown'ed control pt
 
 const svg = new SvgElem({
 	parentDom: document.getElementById('svg-container'),
@@ -22,26 +22,42 @@ const svg = new SvgElem({
 const bezier = new SvgCubicBezier({
 	parentDom: svg.elem,
 	ctrlPts: [
-		{ x: 50, y: 50 },
-		{ x: 350, y: 350 },
+		{ x: WIN_W / 2 - 100, y: WIN_H / 2 - 100 },
+		{ x: WIN_W / 2 + 100, y: WIN_H / 2 + 100 },
 	],
-	shouldDrawHelpers: true,
+	styleCurve: {
+		'stroke': 'rgb(255,255,255)',
+		'stroke-width': '2px',
+	},
+	styleAnchorPts:{
+		'stroke': 'rgb(255,255,255)',
+		'stroke-width': '2px',
+	},
+	styleCtrlPts:{
+		'stroke': 'rgb(255,255,255)',
+		'stroke-width': '2px',
+	},
+	styleHandles:{
+		'stroke': 'rgb(255,255,255)',
+		'stroke-width': '1px',
+		'stroke-dasharray': '2 2',
+	},
+	shouldShowCtrlPts: true,
 	onCtrlPtClick: (ctrlPtIndex, svgTarget, svgElem)=>{
-		mousedownPtIndex = ctrlPtIndex
-		console.log('mousedownPtIndex', mousedownPtIndex)
+		mdCtrlPtIndex = ctrlPtIndex
 	}
 }).calc().draw()
 
 
 document.addEventListener('mouseup', (e)=>{
-	mousedownPtIndex = undefined
+	mdCtrlPtIndex = undefined
 })
+
 document.addEventListener('mousemove', (e)=>{
 	const { clientX, clientY } = e
-	if(mousedownPtIndex !== undefined){
+	if(mdCtrlPtIndex !== undefined){ // if with mousedown...
 		const updatedPts = bezier.getCtrlPts()
-		updatedPts.splice(mousedownPtIndex, 1, { x: clientX, y: clientY })
-		console.log('updatedPts', updatedPts)
+		updatedPts.splice(mdCtrlPtIndex, 1, { x: clientX, y: clientY })
 		bezier.updateProps({
 			ctrlPts: updatedPts		
 		})
@@ -67,12 +83,12 @@ class UI extends React.Component {
 					value="show-ctrl-pts"
 					isSelected={this.state.shouldShowCtrlPts}
 					onClick={()=>{
+						const shouldShowCtrlPts = !this.state.shouldShowCtrlPts
 						this.setState({
-							shouldShowCtrlPts: !this.state.shouldShowCtrlPts
+							shouldShowCtrlPts,
 						})
-
 						bezier.updateProps({
-							shouldDrawHelpers: !bezier.props.shouldDrawHelpers
+							shouldShowCtrlPts,
 						})
 					}}
 					/>
