@@ -7,10 +7,11 @@ export const STYLE_BZ_CURVE: IStyle = {
 	'z-index': '-9999',
 }
 
-export const STYLE_CTRL_PT: IStyle = {
+export const STYLE_CTRL_LINE: IStyle = {
 	'fill': 'none',
 	'stroke': 'black',
-	'stroke-width': '2px',
+	'stroke-width': '1px',
+	'stroke-dasharray': '2 1',
 }
 
 export const STYLE_START_PT_END_PT: IStyle = {
@@ -21,9 +22,10 @@ export const STYLE_START_PT_END_PT: IStyle = {
 	'z-index': '-9999',
 }
 
-export const STYLE_CTRL_LINE: IStyle = {
-	'fill': 'none',
+export const STYLE_CTRL_PT: IStyle = {
+	'fill': 'rgba(255,0,0,0.0)',
 	'stroke': 'black',
-	'stroke-width': '1px',
-	'stroke-dasharray': '2 1',
+	'stroke-width': '2px',
+	'cursor': 'pointer',
 }
+

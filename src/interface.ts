@@ -9,13 +9,15 @@ export interface IStyle {
 
 export interface IProps {
 	parentDom: HTMLElement
-	startPt: IPt
-	endPt: IPt
-	ctrlPtStart: IPt,
-	ctrlPtEnd: IPt,
+	ctrlPts: Array<IPt>
 	endMarkerId: string
 	startMarkerId: string
 	styleCurve: IStyle
 	shouldDrawHelpers: boolean
 	isDualDirection: boolean
+	onCtrlPtClick: Function
+}
+
+export interface HTMLInputEvent extends Event {
+	target: HTMLInputElement & EventTarget;
 }

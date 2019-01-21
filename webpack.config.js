@@ -37,7 +37,8 @@ module.exports = {
 		rules: [ 
 			{ test: /\.css$/, use: ['style-loader', 'css-loader']},
 			{ test: /\.ts(x?)$/, loader: 'ts-loader' },
-			{ test: /\.json$/, loader: 'json-loader' },			
+			{ test: /\.json$/, loader: 'json-loader' },
+			{ test: /\.(js|jsx)$/, use: 'babel-loader', exclude: /node_modules/ },			
 		]
 	},
 	plugins: arrHtmlWebpackPlugins,

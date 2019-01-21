@@ -2,11 +2,15 @@ body {
 	margin: 0;
 	overflow: hidden;
 	user-select: none;
-	background: rgba(175,214,205);
 }
 
 svg {
+	background: rgb(175, 214, 205);
 	position: absolute;
+}
+
+.ui {
+	position: absolute;	
 }
 
 .anno-content {

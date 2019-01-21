@@ -7,27 +7,58 @@ const WIN_W = window.innerWidth
 const WIN_H = window.innerHeight
 
 
+let mousedownPtIndex
+
 const svg = new SvgElem({
-	parentDom: document.getElementById('root'),
+	parentDom: document.getElementById('svg-container'),
 	tag: 'svg',
 	attr:{
 		'width': WIN_W,
 		'height': WIN_H,
 	},
-	style:{
-		'background': '#eee',
-	}
 })
 
 const bezier = new SvgCubicBezier({
 	parentDom: svg.elem,
-	startPt: { x:50, y:50 },
-	endPt: { x:350, y:350 },
+	ctrlPts: [
+		{ x: 50, y: 50 },
+		{ x: 350, y: 350 },
+	],
 	shouldDrawHelpers: true,
+	onCtrlPtClick: (ctrlPtIndex, svgTarget, svgElem)=>{
+		mousedownPtIndex = ctrlPtIndex
+		console.log('mousedownPtIndex', mousedownPtIndex)
+	}
 }).calc().draw()
 
 
+document.addEventListener('mouseup', (e)=>{
+	mousedownPtIndex = undefined
+})
+document.addEventListener('mousemove', (e)=>{
+	const { clientX, clientY } = e
+	if(mousedownPtIndex !== undefined){
+		const updatedPts = bezier.getCtrlPts()
+		updatedPts.splice(mousedownPtIndex, 1, { x: clientX, y: clientY })
+		console.log('updatedPts', updatedPts)
+		bezier.updateProps({
+			ctrlPts: updatedPts		
+		})
+	}
+})
+
+
+class UI extends React.Component {
+	render(){
+		return (
+			<div className="ui">
+				why are you running
+			</div>
+		)
+	}
+}
+
 ReactDom.render(
-	<App/>,
-	document.getElementById('root')
+	<UI/>,
+	document.getElementById('ui-container')
 )
