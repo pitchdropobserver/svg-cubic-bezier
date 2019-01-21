@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDom from 'react-dom'
 import SvgElem from 'svg-elem'
+import { CheckBox } from './util'
 import SvgCubicBezier from '../../src'
 import './styles.css'
 const WIN_W = window.innerWidth
@@ -49,10 +50,32 @@ document.addEventListener('mousemove', (e)=>{
 
 
 class UI extends React.Component {
+	constructor(props){
+		super(props)
+		this.state = {
+			shouldShowCtrlPts: true
+		}
+	}
 	render(){
+		const {
+			shouldShowCtrlPts,
+		} = this.state
 		return (
 			<div className="ui">
-				why are you running
+				<CheckBox
+					label="show control points"
+					value="show-ctrl-pts"
+					isSelected={this.state.shouldShowCtrlPts}
+					onClick={()=>{
+						this.setState({
+							shouldShowCtrlPts: !this.state.shouldShowCtrlPts
+						})
+
+						bezier.updateProps({
+							shouldDrawHelpers: !bezier.props.shouldDrawHelpers
+						})
+					}}
+					/>
 			</div>
 		)
 	}

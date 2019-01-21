@@ -24,3 +24,11 @@ svg {
 	font-style: italic;
 	color: white;
 }
+
+
+.checkbox-container {
+	font: normal 12px Arial;
+}
+.checkbox-container * {
+	cursor: pointer;
+}

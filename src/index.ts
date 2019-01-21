@@ -14,8 +14,9 @@ import { IProps, HTMLInputEvent } from './interface'
 class SvgCubicBezier {
 
 	public props: IProps
-	//---- element references ----
+	//---- bezier curve element ----
 	private svgBezierCurve: SvgElem
+	//---- helper element ----
 	private svgCtrlPt0: SvgElem // start point on  crv
 	private svgCtrlPt1: SvgElem // detached control pt off start 
 	private svgCtrlPt2: SvgElem // detached control pt off end 
@@ -44,11 +45,12 @@ class SvgCubicBezier {
 	public handlePtClick(e: HTMLInputEvent): void{
 		const { target } = e
 		const { 
+			shouldDrawHelpers,
 			onCtrlPtClick,
 			endMarkerId,
 			startMarkerId,
 		} = this.props
-		if (onCtrlPtClick !== undefined){
+		if (shouldDrawHelpers && onCtrlPtClick){
 			switch (target.id) {
 				case startMarkerId: 
 					onCtrlPtClick(0, target, this.svgCtrlPt0)
@@ -100,8 +102,36 @@ class SvgCubicBezier {
 		if (shouldDrawHelpers) {
 			this.drawCrvStartEndPt()
 			this.drawCrvHelperArms()
+		} else {
+			const { svgCtrlArmStart } = this
+			if (svgCtrlArmStart){ // if helpers are drawn...
+				this.removeHelpers()
+			}
 		}
 		return this
+	}
+
+	private removeHelpers(): void{
+		const { 
+			svgCtrlArmStart,
+			svgCtrlArmEnd,
+			svgCtrlPt0,
+			svgCtrlPt1,
+			svgCtrlPt2,
+			svgCtrlPt3,
+		} = this
+		svgCtrlArmStart.destroy()
+		svgCtrlArmEnd.destroy()
+		svgCtrlPt0.destroy()
+		svgCtrlPt1.destroy()
+		svgCtrlPt2.destroy()
+		svgCtrlPt3.destroy()
+		this.svgCtrlArmStart = undefined
+		this.svgCtrlArmEnd = undefined
+		this.svgCtrlPt0 = undefined
+		this.svgCtrlPt1 = undefined
+		this.svgCtrlPt2 = undefined
+		this.svgCtrlPt3 = undefined
 	}
 
 	private calcControlPts(): void {
@@ -209,7 +239,6 @@ class SvgCubicBezier {
 				'r': 4,
 			})
 		} else { // init...
-		
 			this.svgCtrlPt0 = new SvgElem({ // crv start
 				parentDom: parentDom,
 				tag: 'circle',
