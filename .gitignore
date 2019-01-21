@@ -1,0 +1,15 @@
+# Logs
+logs
+*.log
+.DS_Store
+
+# Dependency directory
+node_modules
+npm-debug.log
+
+# Optional npm cache directory
+.npm
+
+
+# dist files
+lib
