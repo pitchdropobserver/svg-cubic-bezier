@@ -28,20 +28,23 @@ class SvgCubicBezier {
 			parentDom: null,
 			startPt: null,
 			endPt: null,
+			ctrlPtStart: null,
+			ctrlPtEnd: null,
 			endMarkerId: '',
 			startMarkerId: '',
 			styleCurve: null,
 			shouldDrawHelpers: false,
 			isDualDirection: false, // if curve is dual direction, control pts will flips sides when crv startPt moves to right of endPt...
 		}, props)
+		return this
 	}
 
-	public updateProps(props: IProps): void {
+	public updateProps(props: IProps): SvgCubicBezier {
 		Object.assign(this.props, props)
 		this.calc()
 		this.draw()
+		return this
 	}
-
 
 	public remove(): void {
 		if (this.svgBezierCurve !== null) this.svgBezierCurve.destroy()
@@ -54,17 +57,19 @@ class SvgCubicBezier {
 		purgeOwnKeys(this, true)
 	}
 
-	private calc(): void {
+	private calc(): SvgCubicBezier {
 		this.calcControlPts()
+		return this
 	}
 
-	private draw(): void {
+	private draw(): SvgCubicBezier {
 		const { shouldDrawHelpers } = this.props
 		this.drawBezierCurve()
 		if (shouldDrawHelpers) {
 			this.drawStartEndPt()
 			this.drawHelpers()
 		}
+		return this
 	}
 
 	private calcControlPts(): void {
@@ -139,15 +144,15 @@ class SvgCubicBezier {
 			'd': svgPath,
 		}
 
-		if (svgBezierCurve === null) { // init...
+		if (svgBezierCurve instanceof SvgElem) { // update...
+			svgBezierCurve.setAttr(attr)
+		} else { // init...
 			this.svgBezierCurve = new SvgElem({
 				parentDom: parentDom,
 				tag: 'path',
 				style: styleCurve || STYLE_BZ_CURVE,
 				attr,
 			})
-		} else { // update...
-			svgBezierCurve.setAttr(attr)
 		}
 	}
 
@@ -155,7 +160,18 @@ class SvgCubicBezier {
 		const { parentDom, startPt, endPt } = this.props
 		const { svgStartPt, svgEndPt } = this
 
-		if (svgStartPt === null) { // init...
+		if (svgStartPt instanceof SvgElem) { // update...
+			svgStartPt.setAttr({
+				'cx': startPt.x,
+				'cy': startPt.y,
+				'r': 4,
+			})
+			svgEndPt.setAttr({
+				'cx': endPt.x,
+				'cy': endPt.y,
+				'r': 4,
+			})
+		} else { // init...
 			this.svgStartPt = new SvgElem({
 				parentDom: parentDom,
 				tag: 'circle',
@@ -178,17 +194,6 @@ class SvgCubicBezier {
 					'r': 4,
 				}
 			})
-		} else { // update...
-			svgStartPt.setAttr({
-				'cx': startPt.x,
-				'cy': startPt.y,
-				'r': 4,
-			})
-			svgEndPt.setAttr({
-				'cx': endPt.x,
-				'cy': endPt.y,
-				'r': 4,
-			})
 		}
 	}
 
@@ -206,7 +211,30 @@ class SvgCubicBezier {
 			svgCtrlLineEnd,
 		} = this
 
-		if (svgCtrlPtStart === null) { // init...
+		if (svgCtrlPtStart instanceof SvgElem) { // update...
+			svgCtrlPtStart.setAttr({
+				'cx': ctrlPtStart.x,
+				'cy': ctrlPtStart.y,
+				'r': 4,
+			})
+			svgCtrlLineStart.setAttr({
+				'x1': startPt.x,
+				'y1': startPt.y,
+				'x2': ctrlPtStart.x,
+				'y2': ctrlPtStart.y,
+			})
+			svgCtrlPtEnd.setAttr({
+				'cx': ctrlPtEnd.x,
+				'cy': ctrlPtEnd.y,
+				'r': 4,
+			})
+			svgCtrlLineEnd.setAttr({
+				'x1': endPt.x,
+				'y1': endPt.y,
+				'x2': ctrlPtEnd.x,
+				'y2': ctrlPtEnd.y,
+			})
+		} else { // init...
 			this.svgCtrlPtStart = new SvgElem({
 				parentDom: parentDom,
 				tag: 'circle',
@@ -248,29 +276,6 @@ class SvgCubicBezier {
 					'x2': ctrlPtEnd.x,
 					'y2': ctrlPtEnd.y,
 				}
-			})
-		} else { // update...
-			svgCtrlPtStart.setAttr({
-				'cx': ctrlPtStart.x,
-				'cy': ctrlPtStart.y,
-				'r': 4,
-			})
-			svgCtrlLineStart.setAttr({
-				'x1': startPt.x,
-				'y1': startPt.y,
-				'x2': ctrlPtStart.x,
-				'y2': ctrlPtStart.y,
-			})
-			svgCtrlPtEnd.setAttr({
-				'cx': ctrlPtEnd.x,
-				'cy': ctrlPtEnd.y,
-				'r': 4,
-			})
-			svgCtrlLineEnd.setAttr({
-				'x1': endPt.x,
-				'y1': endPt.y,
-				'x2': ctrlPtEnd.x,
-				'y2': ctrlPtEnd.y,
 			})
 		}
 

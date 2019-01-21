@@ -1,0 +1,22 @@
+body {
+	margin: 0;
+	overflow: hidden;
+	user-select: none;
+	background: rgba(175,214,205);
+}
+
+svg {
+	position: absolute;
+}
+
+.anno-content {
+	position: absolute;
+	top: 50%;
+	width: 100%;
+	text-align: center;
+}
+
+.source-link {
+	font-style: italic;
+	color: white;
+}
