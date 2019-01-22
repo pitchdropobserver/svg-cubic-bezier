@@ -3,7 +3,6 @@ import ReactDom from 'react-dom'
 import SvgElem from 'svg-elem'
 
 import SvgCubicBezier from '../../src'
-import Tween from '../../src/Tween'
 import { CheckBox } from './util'
 import { 
 	TEMPLATE_W,

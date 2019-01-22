@@ -1,6 +1,6 @@
 import SvgElem from 'svg-elem'
 import { purgeOwnKeys, deepMergeTwoObjs, copy } from 'brodash'
-import Tween, { ITweenState } from './Tween'
+import Tween, { ITweenState } from 'inbtwn'
 import {
 	STYLE_CURVE,
 	STYLE_CTRL_PTS,
