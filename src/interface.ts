@@ -18,7 +18,7 @@ export interface IProps {
 	styleHandles: ICssStyle
 	shouldShowCtrlPts: boolean
 	isDualDirection: boolean
-	onCtrlPtClick: Function
+	onCtrlPtMouseDown: Function
 }
 
 export interface HTMLInputEvent extends Event {

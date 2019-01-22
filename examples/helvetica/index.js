@@ -41,6 +41,11 @@ const arrBezierCrvs = [
 			x: pt.x * SCALE_FACTOR + TEMPLATE_LEFT,
 			y: pt.y * SCALE_FACTOR + TEMPLATE_TOP
 		})),
+		shouldShowCtrlPts: true,
+		onCtrlPtMouseDown: (ctrlPtIndex, svgTarget, svgElem) => {
+			mdCrvIndex = i
+			mdCtrlPtIndex = ctrlPtIndex
+		},
 		styleCurve: {
 			'stroke': 'rgb(255,255,255)',
 			'stroke-width': '2.5px',
@@ -58,11 +63,6 @@ const arrBezierCrvs = [
 			'stroke-width': '1px',
 			'stroke-dasharray': '2 2',
 		},
-		shouldShowCtrlPts: true,
-		onCtrlPtClick: (ctrlPtIndex, svgTarget, svgElem) => {			
-			mdCrvIndex = i
-			mdCtrlPtIndex = ctrlPtIndex
-		}
 	}).calc().draw()
 })
 

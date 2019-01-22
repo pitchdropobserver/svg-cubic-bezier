@@ -26,7 +26,7 @@ class SvgCubicBezier {
 	private svgCtrlHandleEnd: SvgElem
 
 	constructor(props: IProps) {
-		this.handlePtClick = this.handlePtClick.bind(this)
+		this.handleCtrlPtMouseDown = this.handleCtrlPtMouseDown.bind(this)
 		this.props = deepMergeTwoObjs({
 			// default props...
 			parentDom: null,
@@ -46,27 +46,27 @@ class SvgCubicBezier {
 		return this.props.ctrlPts.slice()
 	}
 
-	public handlePtClick(e: HTMLInputEvent): void{
+	public handleCtrlPtMouseDown(e: HTMLInputEvent): void{
 		const { target } = e
 		const { 
 			shouldShowCtrlPts,
-			onCtrlPtClick,
+			onCtrlPtMouseDown,
 			endMarkerId,
 			startMarkerId,
 		} = this.props
-		if (shouldShowCtrlPts && onCtrlPtClick){
+		if (shouldShowCtrlPts && onCtrlPtMouseDown){
 			switch (target.id) {
 				case startMarkerId: 
-					onCtrlPtClick(0, target, this.svgCtrlPt0)
+					onCtrlPtMouseDown(0, target, this.svgCtrlPt0)
 					break
 				case 'bezier-ctrl-pt-1': 
-					onCtrlPtClick(1, target, this.svgCtrlPt1)
+					onCtrlPtMouseDown(1, target, this.svgCtrlPt1)
 					break
 				case 'bezier-ctrl-pt-2': 
-					onCtrlPtClick(2, target, this.svgCtrlPt2)
+					onCtrlPtMouseDown(2, target, this.svgCtrlPt2)
 					break
 				case endMarkerId: 
-					onCtrlPtClick(3, target, this.svgCtrlPt3)
+					onCtrlPtMouseDown(3, target, this.svgCtrlPt3)
 					break
 			}
 		}
@@ -245,7 +245,7 @@ class SvgCubicBezier {
 				parentDom: parentDom,
 				tag: 'circle',
 				listeners:{
-					'mousedown': this.handlePtClick,
+					'mousedown': this.handleCtrlPtMouseDown,
 				},
 				style: styleAnchorPts,
 				attr: {
@@ -259,7 +259,7 @@ class SvgCubicBezier {
 				parentDom: parentDom,
 				tag: 'circle',
 				listeners: {
-					'mousedown': this.handlePtClick,
+					'mousedown': this.handleCtrlPtMouseDown,
 				},
 				style: styleAnchorPts,
 				attr: {
@@ -337,7 +337,7 @@ class SvgCubicBezier {
 				parentDom: parentDom,
 				tag: 'circle',
 				listeners: {
-					'mousedown': this.handlePtClick,
+					'mousedown': this.handleCtrlPtMouseDown,
 				},
 				style: styleCtrlPts,
 				attr: {
@@ -351,7 +351,7 @@ class SvgCubicBezier {
 				parentDom: parentDom,
 				tag: 'circle',
 				listeners: {
-					'mousedown': this.handlePtClick,
+					'mousedown': this.handleCtrlPtMouseDown,
 				},
 				style: styleCtrlPts,
 				attr: {
