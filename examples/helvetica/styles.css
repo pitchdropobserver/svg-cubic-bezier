@@ -1,0 +1,39 @@
+body {
+	margin: 0;
+	overflow: hidden;
+	user-select: none;
+}
+
+#svg-container {
+	position: absolute;
+	background: rgb(175, 214, 205);
+	/* background: rgb(61, 191, 258); */
+}
+
+#ui-container {
+	font-family: sans-serif;
+	color: rgba(250,250,250);
+}
+
+.prompt {
+	font-weight: 100;
+	font-size: 12px;
+}
+
+.checkbox-container input {
+	cursor: pointer;
+}
+
+.checkbox-container label {
+	margin-left: 5px;
+	font-weight: 100;
+	font-size: 12px;
+	cursor: pointer;
+}
+
+.source-link {
+	font-weight: 100;
+	font-size: 12px;
+	cursor: pointer;
+	color: rgba(250,250,250);
+}
