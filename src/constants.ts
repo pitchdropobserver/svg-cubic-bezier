@@ -4,7 +4,7 @@ export const STYLE_CURVE: ICssStyle = {
 	'fill': 'none',
 	'stroke': 'black',
 	'stroke-width': '2px',
-	'z-index': '-9999',
+	// 'z-index': '-9999',
 }
 
 export const STYLE_HANDLES: ICssStyle = {
@@ -19,7 +19,7 @@ export const STYLE_ANCHOR_PTS: ICssStyle = {
 	'stroke': 'black',
 	'stroke-width': '2px',
 	'cursor': 'pointer',
-	'z-index': '-9999',
+	// 'z-index': '-9999',
 }
 
 export const STYLE_CTRL_PTS: ICssStyle = {

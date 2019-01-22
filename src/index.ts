@@ -1,6 +1,6 @@
 import SvgElem from 'svg-elem'
 import { purgeOwnKeys, deepMergeTwoObjs, copy } from 'brodash'
-
+import Tween, { ITweenState } from './Tween'
 import {
 	STYLE_CURVE,
 	STYLE_CTRL_PTS,
@@ -8,8 +8,12 @@ import {
 	STYLE_HANDLES,
 } from './constants'
 
-import { IProps, HTMLInputEvent } from './interface'
-
+import { 
+	IPt,
+	IProps,
+	IAnimParam,
+	HTMLInputEvent,
+} from './interface'
 
 
 class SvgCubicBezier {
@@ -38,8 +42,20 @@ class SvgCubicBezier {
 			styleCtrlPts: copy(STYLE_CTRL_PTS),
 			styleHandles: copy(STYLE_HANDLES),
 			styleCurve: copy(STYLE_CURVE),
-		}, props, 'parentDom')
+		}, props, 'parentDom')		
+
+		if (this.props.ctrlPts.length === 2) { // if only crv start, end provided...	
+			this.calcControlPts()	
+		}
 		return this
+	}
+
+	static reducePts(arrPts: Array<IPt>): ITweenState {
+		return arrPts.reduce((prev: Object, pt: IPt, i: number) => {
+			prev[`x${i}`] = pt.x
+			prev[`y${i}`] = pt.y
+			return prev
+		}, {})
 	}
 
 	public getCtrlPts(){
@@ -72,10 +88,35 @@ class SvgCubicBezier {
 		}
 	}
 
-	public updateProps(props: IProps): SvgCubicBezier {
-		deepMergeTwoObjs(this.props, props, 'parentDom')
-		this.calc()
-		this.draw()
+	public updateProps(nextProps: IProps, anim: IAnimParam): SvgCubicBezier {
+		if(
+			nextProps.ctrlPts !== undefined
+			&& anim !== undefined	
+		){ // if new points provided...
+			const { dur, ease, delay } = anim
+			const { ctrlPts } = this.props
+			const current = SvgCubicBezier.reducePts(this.props.ctrlPts)
+			const endState = SvgCubicBezier.reducePts(nextProps.ctrlPts)
+			new Tween(current)
+				.to(endState, dur)
+				.easing(ease)
+				.delay(delay)
+				.onUpdate(()=>{
+					ctrlPts.forEach((pt, i)=>{
+						pt.x = current['x' + i]
+						pt.y = current['y' + i]
+					})
+					this.draw()
+				})
+				.onComplete(()=>{
+					deepMergeTwoObjs(this.props, nextProps, 'parentDom')
+					this.draw()
+				})
+				.start()
+		} else {
+			deepMergeTwoObjs(this.props, nextProps, 'parentDom')
+			this.draw()
+		}		
 		return this
 	}
 
@@ -88,16 +129,6 @@ class SvgCubicBezier {
 		if (this.svgCtrlHandleStart !== null) this.svgCtrlHandleStart.destroy()
 		if (this.svgCtrlHandleEnd !== null) this.svgCtrlHandleEnd.destroy()
 		purgeOwnKeys(this, true)
-	}
-
-	private calc(): SvgCubicBezier {
-		const { ctrlPts } = this.props
-		if (ctrlPts.length === 2){ // only crv start, end provided...
-			this.calcControlPts()
-		} else { // all control points provided...
-			// no op...
-		}
-		return this
 	}
 
 	private draw(): SvgCubicBezier {
@@ -117,15 +148,15 @@ class SvgCubicBezier {
 
 	private removeHelpers(): void{
 		const { 
-			svgCtrlHandleStart: svgCtrlArmStart,
-			svgCtrlHandleEnd: svgCtrlArmEnd,
+			svgCtrlHandleStart,
+			svgCtrlHandleEnd,
 			svgCtrlPt0,
 			svgCtrlPt1,
 			svgCtrlPt2,
 			svgCtrlPt3,
 		} = this
-		svgCtrlArmStart.destroy()
-		svgCtrlArmEnd.destroy()
+		svgCtrlHandleStart.destroy()
+		svgCtrlHandleEnd.destroy()
 		svgCtrlPt0.destroy()
 		svgCtrlPt1.destroy()
 		svgCtrlPt2.destroy()
@@ -227,15 +258,15 @@ class SvgCubicBezier {
 
 	private drawCrvStartEndPt(): void {
 		const { parentDom, ctrlPts, styleAnchorPts } = this.props
-		const { svgCtrlPt0: svgStartPt, svgCtrlPt3: svgEndPt } = this
+		const { svgCtrlPt0, svgCtrlPt3 } = this
 
-		if (svgStartPt instanceof SvgElem) { // update...
-			svgStartPt.setAttr({ // crv start
+		if (svgCtrlPt0 instanceof SvgElem) { // update...
+			svgCtrlPt0.setAttr({ // crv start
 				'cx': ctrlPts[0].x,
 				'cy': ctrlPts[0].y,
 				'r': 4,
 			})
-			svgEndPt.setAttr({ // crv end
+			svgCtrlPt3.setAttr({ // crv end
 				'cx': ctrlPts[3].x,
 				'cy': ctrlPts[3].y,
 				'r': 4,
@@ -281,10 +312,10 @@ class SvgCubicBezier {
 		} = this.props
 
 		const {
-			svgCtrlHandleStart: svgCtrlArmStart,
+			svgCtrlHandleStart,
 			svgCtrlPt1,
 			svgCtrlPt2,
-			svgCtrlHandleEnd: svgCtrlArmEnd,
+			svgCtrlHandleEnd,
 		} = this
 
 		if (svgCtrlPt1 instanceof SvgElem) { // update...
@@ -293,7 +324,7 @@ class SvgCubicBezier {
 				'cy': ctrlPts[1].y,
 				'r': 4,
 			})
-			svgCtrlArmStart.setAttr({
+			svgCtrlHandleStart.setAttr({
 				'x1': ctrlPts[0].x,
 				'y1': ctrlPts[0].y,
 				'x2': ctrlPts[1].x,
@@ -304,7 +335,7 @@ class SvgCubicBezier {
 				'cy': ctrlPts[2].y,
 				'r': 4,
 			})
-			svgCtrlArmEnd.setAttr({
+			svgCtrlHandleEnd.setAttr({
 				'x1': ctrlPts[3].x,
 				'y1': ctrlPts[3].y,
 				'x2': ctrlPts[2].x,

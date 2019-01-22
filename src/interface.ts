@@ -7,6 +7,12 @@ export interface ICssStyle {
 	[index: string]: string
 }
 
+export interface IAnimParam {
+	dur: number
+	delay: number
+	ease: 'string'
+}
+
 export interface IProps {
 	parentDom: HTMLElement
 	ctrlPts: Array<IPt>

@@ -3,6 +3,7 @@ import ReactDom from 'react-dom'
 import SvgElem from 'svg-elem'
 
 import SvgCubicBezier from '../../src'
+import Tween from '../../src/Tween'
 import { CheckBox } from './util'
 import { 
 	TEMPLATE_W,
@@ -31,10 +32,12 @@ const svg = new SvgElem({
 	},
 })
 
-const arrBezierCrvs = [
+const DEFAULT_CRVS = [
 	...TEMPLATE_OUTTER_CRVS,
 	...TEMPLATE_INNER_CRVS,
-].map((arrPts, i)=>{
+]
+
+const arrBezierCrvs = DEFAULT_CRVS.map((arrPts, i)=>{
 	return new SvgCubicBezier({
 		parentDom: svg.elem,
 		ctrlPts: arrPts.map(pt => ({
@@ -63,7 +66,7 @@ const arrBezierCrvs = [
 			'stroke-width': '1px',
 			'stroke-dasharray': '2 2',
 		},
-	}).calc().draw()
+	}).draw()
 })
 
 document.addEventListener('mouseup', (e)=>{
@@ -84,14 +87,38 @@ document.addEventListener('mousemove', (e)=>{
 	}
 })
 
-
 class Anno extends React.Component {
 	constructor(props){
 		super(props)
+		this.toggleControlPts = this.toggleControlPts.bind(this)
 		this.state = {
 			shouldShowCtrlPts: true
 		}
 	}
+
+	toggleControlPts(){
+		const shouldShowCtrlPts = !this.state.shouldShowCtrlPts
+		this.setState({
+			shouldShowCtrlPts,
+		})
+		arrBezierCrvs.forEach((crv) => {
+			crv.updateProps({
+				shouldShowCtrlPts,
+			})
+		})
+	}
+
+	resetBezierCrvs(){
+		arrBezierCrvs.forEach((crv, i) => {
+			crv.updateProps({
+				ctrlPts: DEFAULT_CRVS[i].map(pt => ({
+					x: pt.x * SCALE_FACTOR + TEMPLATE_LEFT,
+					y: pt.y * SCALE_FACTOR + TEMPLATE_TOP
+				}))
+			}, { dur: 600 })
+		})
+	}
+	
 	render(){
 		return (
 			<div className="ui"
@@ -109,18 +136,12 @@ class Anno extends React.Component {
 					label="show control points"
 					value="show-ctrl-pts"
 					isSelected={this.state.shouldShowCtrlPts}
-					onClick={()=>{
-						const shouldShowCtrlPts = !this.state.shouldShowCtrlPts
-						this.setState({
-							shouldShowCtrlPts,
-						})
-						arrBezierCrvs.forEach((crv)=>{
-							crv.updateProps({
-								shouldShowCtrlPts,
-							})
-						})
-					}}
+					onClick={this.toggleControlPts}
 					/>
+				<button 
+					onClick={this.resetBezierCrvs}>
+					reset curves
+				</button>
 				<a className="source-link" href="https://github.com/pitchdropobserver/svg-cubic-bezier/blob/master/examples/helvetica/index.js">
 					view source
 				</a>
