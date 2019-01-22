@@ -18,12 +18,23 @@ body {
 .prompt {
 	font-weight: 100;
 	font-size: 12px;
+	margin-bottom: 15px;
 }
 
-.checkbox-container input {
+button {
+	display: block;
+	margin: 0 auto;
+	margin-bottom: 5px;
+	width: 125px;
 	cursor: pointer;
 }
 
+.checkbox-container {
+	margin-bottom: 5px;
+}
+.checkbox-container input {
+	cursor: pointer;
+}
 .checkbox-container label {
 	margin-left: 5px;
 	font-weight: 100;

@@ -132,16 +132,16 @@ class Anno extends React.Component {
 				<p className="prompt">
 					Adjust handles to reshape curve.
 				</p>
+				<button 
+					onClick={this.resetBezierCrvs}>
+					reset curves
+				</button>
 				<CheckBox
 					label="show control points"
 					value="show-ctrl-pts"
 					isSelected={this.state.shouldShowCtrlPts}
 					onClick={this.toggleControlPts}
 					/>
-				<button 
-					onClick={this.resetBezierCrvs}>
-					reset curves
-				</button>
 				<a className="source-link" href="https://github.com/pitchdropobserver/svg-cubic-bezier/blob/master/examples/helvetica/index.js">
 					view source
 				</a>
